@@ -1,9 +1,6 @@
-range,best
-rf,10-500,12
-1a,1-200,119
-1b,1-200,119
-2a,1-200,119
-2b,1-200,119
-3a,None,500
-3b,None,500
-
+,range_labeled,best_data_labeled,max_leaf_data_labeled,range_original,best_data_original,max_leaf_data_original
+bag_clf,1-500,75.0,8.0,1-500,17.0,8.0
+pas_clf,1-500,48.0,8.0,1-500,7.0,8.0
+adaboost,1-500,488.0,8.0,1-500,7.0,8.0
+rf,1-500,28.0,8.0,1-500,336.0,8.0
+bag_clf-past_clf-adaboost,1-500,28.0,8.0,1-500,336.0,8.0
