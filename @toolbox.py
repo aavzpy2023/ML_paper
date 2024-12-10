@@ -63,7 +63,7 @@ data_x_mz = pd.read_excel(
 )
 scaler = RobustScaler()
 result_to_txt = list()
-width_of_text = 120
+width_of_text = 280
 
 
 def select_model() -> str:
@@ -125,7 +125,7 @@ def process_data(k_data: str) -> pd.DataFrame:
         pd.DataFrame: _description_
     """
     csv_data = pd.read_csv("ok_data.csv", parse_dates=[2], index_col=0)
-    print("Data have been load")
+    print("Data have been loaded")
     # Relabel data if necessary
     if k_data != "relabeled":
         full_data = csv_data.copy()
@@ -733,8 +733,8 @@ def get_model_performance(
     )
     all_res.index = months[init_month - 1 :]
     print_sms(all_res.to_string())
-    print_sms(all_res.sum())
-    print_sms(all_res.mean())
+    # print_sms(all_res.sum())
+    # print_sms(all_res.mean())
     report = all_results.copy()
     months = (
         "January",
