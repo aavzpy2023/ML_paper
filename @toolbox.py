@@ -125,7 +125,6 @@ def process_data(k_data: str) -> pd.DataFrame:
         pd.DataFrame: _description_
     """
     csv_data = pd.read_csv("ok_data.csv", parse_dates=[2], index_col=0)
-    print("Data have been loaded")
     # Relabel data if necessary
     if k_data != "relabeled":
         full_data = csv_data.copy()
@@ -222,15 +221,12 @@ def train_model(
     training_data = full_data[
         (full_data["date"] > first_date) & (full_data["date"] < predict_date_begin)
     ]
-    percent_training_set = training_data.shape[0] / full_data.shape[0]
-    print_sms(f"Percentage of training set :{int(percent_training_set * 100)}")
-    print_sms(
-        f"Percentage of testing set\
-            :{100 - int(percent_training_set * 100)}"
-    )
+    print_sms(f"Percentage of training set: 70")
+    print_sms(f"Percentage of testing set: 30")
     X = training_data.loc[:, "1_week_ago":"8_week_ago"]
     # status col was deleted and status_clf renamed for status
     y = training_data["status"]
+    print("aaaaaaa    ", train_test)
     if train_test:
         X_scaled = scaler.fit_transform(X)
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.3)
@@ -278,8 +274,6 @@ def select_model_to_run(model_name: str, k_data: str):
     raf_clf = RandomForestClassifier(
         n_estimators=int(rf_estimator), random_state=42, max_features=1.0, n_jobs=-1
     )
-    # scaler = MinMaxScaler(feature_range=(0, 1))
-    # scaler =
     print_sms("Training model")
     if model_name == "bag_clf-past_clf-adaboost":
         print("running bag_clf-past_clf-adaboost model")
@@ -405,9 +399,6 @@ def select_model_to_run(model_name: str, k_data: str):
     return voting_clf
 
 
-# @jitclass
-# def fit_numba(ml_obj, data, y):
-# return ml_obj.fit(data, y)
 def test_model(voting_clf: StackingClassifier, full_data: pd.DataFrame) -> tuple:
     """_summary_
     Test the model in the testing set
@@ -575,7 +566,6 @@ def get_model_performance(
     pos_zon_not_inspected_on_time = list()
     mz_pos_por_no_tratar_mz_adyacentes_previamente = list()
     pos_model_neg_real = list()
-    pos_model_neg_real_pos_for_not_treat_arround_zones_previously = list()
     months = (
         "January",
         "February",
@@ -624,14 +614,6 @@ def get_model_performance(
                 set(prediction_of_the_month)
             )
             all_zones_name = set(Counter(process_data("original").MZ).keys())
-            # neg_predictions = set(all_zones_name).difference(set(prediction_of_the_month))
-            # zones_matches_FN = set(positive_zone_in_period).intersection(neg_predictions)
-            # prec_score = round(len(zones_matches) / (len(zones_matches) + len(zones_matches_FP)), 4)
-            # rec_score = round(len(zones_matches) / (len(zones_matches) + len(zones_matches_FN)) , 4)
-            # f1 = 2 / (1/prec_score + 1/rec_score)
-            # all_prec.append(prec_score)
-            # all_rec.append(rec_score)
-            # all_f1.append(f1)
             total_prediction_month_match.append(len(zones_matches))
             real_month.append(positive_zone_in_period.shape[0])
             acc_month = len(zones_matches) / positive_zone_in_period.shape[0]
@@ -1029,14 +1011,14 @@ def train_and_test(models_to_run: tuple, file_number: 0) -> None:
         )
         results, all_prediction = test_model(trained_model, dataset)
         print_sms("Report of model's performance %s" % mod)
+        all_mod.append(model)
         performance = get_model_performance(
             all_prediction_2022=all_prediction, full_data=dataset, all_results=results
         )
         all_res, report = performance
-        all_mod.append(model)
         overall_acc_model = np.average(report.percent_pron_corr)
-        positive_acc_model = all_res.mean()["precision"]
         all_acc_tmp.append(overall_acc_model)
+        positive_acc_model = all_res.mean()["precision"]
         pos_acc_tmp.append(positive_acc_model)
     run_array = [file_number for _ in range(len(all_acc_tmp))]
     all_acc = pd.DataFrame(
@@ -1097,10 +1079,6 @@ def find_best_estimator(models_to_run: tuple, ask_range: False, file_number: 0) 
         results_find.append(
             f"Running model '{model}' with '{data_to_use}' dataset to find best estimator"
         )
-        # dataset = process_data(data_to_use)
-        # if '-' in model:
-        # print('breaking for...')
-        # break
         while selected_range == "":
             if j == 1:
                 selected_range = estimators_table.loc[model, "range_labeled"]
@@ -1135,7 +1113,6 @@ def find_best_estimator(models_to_run: tuple, ask_range: False, file_number: 0) 
         grid_SearCV = GridSearchCV(
             selected_model, param_grid=param_grid, n_jobs=-1, verbose=1, cv=5
         )
-        # grid_SearCV = RandomizedSearchCV(selected_model, param_distributions=param_grid, n_jobs=-1, verbose=1, cv=2)
         grid_SearCV.fit(X_train, y_train)
         y_predict = cross_val_predict(grid_SearCV, X_train, y_train, cv=5)
         best_est = grid_SearCV.get_params().get("estimator__n_estimators")
